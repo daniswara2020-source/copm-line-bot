@@ -58,7 +58,7 @@ app.post(
       const message =
 `Halo, kak ${order.nama}!
 
-Berikut adalah detail pesanan Anda
+Berikut adalah detail pesanan terbaru Anda
 
 Pesanan : ${order.kebutuhan}
 Deadline : ${order.deadline}
