@@ -34,12 +34,9 @@ app.post(
       const text = event.message.text.trim().toUpperCase();
 
       if (text !== KEYWORD) {
-        await client.replyMessage(event.replyToken, {
-          type: "text",
-          text: "Silakan kirim pesan:\nORDER"
-        });
         return res.sendStatus(200);
       }
+
 
       const order = await getLatestOrder();
       if (!order) {
@@ -51,11 +48,13 @@ app.post(
       }
 
       const message =
-`Halo ${order.nama}!
+`Halo, kak ${order.nama}!
+
+Terima kasih sudah memesan COPM BDMP Kabinet Vidyadharma
+
+Berikut adalah ORDER ID anda untuk pesanan ${order.kebutuhan} dengan deadline yang diajukan pada ${order.deadline}
 
 Order ID: ${order.orderId}
-Pesanan untuk desain: ${order.kebutuhan}
-Deadline: ${order.deadline}
 _______________
 Actuarial Science Student Association
 Line : @057eddac
