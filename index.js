@@ -52,9 +52,11 @@ app.post(
 
 Terima kasih sudah memesan COPM BDMP Kabinet Vidyadharma
 
-Berikut adalah ORDER ID anda untuk pesanan |${order.kebutuhan}| dengan deadline yang diajukan pada |${order.deadline}|
+Berikut adalah detail pesanan anda
 
-ORDER ID: *${order.orderId}*
+Pesanan  : ${order.kebutuhan}
+Deadline : ${order.deadline}
+ORDER ID : ${order.orderId}
 _______________
 Actuarial Science Student Association
 Line : @057eddac
