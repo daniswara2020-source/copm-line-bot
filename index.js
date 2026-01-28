@@ -11,11 +11,10 @@ const LINE_CONFIG = {
 };
 
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
-
-// ⚠️ SESUAI TAB SHEET DI SCREENSHOT
 const SHEET_RANGE = "'Form Responses 1'!A1:Z1000";
 
 const KEYWORD = "ORDER";
+const ORDER_ID_REGEX = /^[A-Z]+[0-9]+$/;
 
 /* ===================== LINE CLIENT ===================== */
 const client = new line.Client(LINE_CONFIG);
@@ -33,12 +32,21 @@ app.post(
 
       const text = event.message.text.trim().toUpperCase();
 
-      if (text !== KEYWORD) {
+      let order = null;
+
+      // CASE 1: ORDER (ambil order terakhir)
+      if (text === KEYWORD) {
+        order = await getLatestOrder();
+      }
+      // CASE 2: ORDER ID (ACAF1, BDMP3, dll)
+      else if (ORDER_ID_REGEX.test(text)) {
+        order = await getOrderById(text);
+      }
+      // selain itu bot DIAM
+      else {
         return res.sendStatus(200);
       }
 
-
-      const order = await getLatestOrder();
       if (!order) {
         await client.replyMessage(event.replyToken, {
           type: "text",
@@ -50,9 +58,7 @@ app.post(
       const message =
 `Halo, kak ${order.nama}!
 
-Terima kasih sudah memesan COPM BDMP Kabinet Vidyadharma
-
-Berikut adalah detail pesanan anda
+Berikut adalah detail pesanan Anda
 
 Pesanan : ${order.kebutuhan}
 Deadline : ${order.deadline}
@@ -76,30 +82,31 @@ Instagram : @assaipb`;
 );
 
 /* ===================== GOOGLE SHEETS ===================== */
-async function getLatestOrder() {
+async function getSheetRows() {
   const auth = new google.auth.GoogleAuth({
     credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
     scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"]
   });
 
   const sheets = google.sheets({ version: "v4", auth });
-
   const response = await sheets.spreadsheets.values.get({
     spreadsheetId: SPREADSHEET_ID,
     range: SHEET_RANGE
   });
 
-  const rows = response.data.values;
-  if (!rows || rows.length < 2) return null;
+  return response.data.values || [];
+}
+
+async function getLatestOrder() {
+  const rows = await getSheetRows();
+  if (rows.length < 2) return null;
 
   const headers = rows[0];
-
   const idxNama = headers.indexOf("Nama");
   const idxKebutuhan = headers.indexOf("Kebutuhan desain (PPT, Poster, Infografis, dll)");
   const idxDeadline = headers.indexOf("Deadline yang diajukan");
   const idxOrderId = headers.indexOf("ORDER ID");
 
-  // Ambil baris terakhir yang ada ORDER ID
   for (let i = rows.length - 1; i > 0; i--) {
     if (rows[i][idxOrderId]) {
       return {
@@ -110,7 +117,29 @@ async function getLatestOrder() {
       };
     }
   }
+  return null;
+}
 
+async function getOrderById(orderId) {
+  const rows = await getSheetRows();
+  if (rows.length < 2) return null;
+
+  const headers = rows[0];
+  const idxNama = headers.indexOf("Nama");
+  const idxKebutuhan = headers.indexOf("Kebutuhan desain (PPT, Poster, Infografis, dll)");
+  const idxDeadline = headers.indexOf("Deadline yang diajukan");
+  const idxOrderId = headers.indexOf("ORDER ID");
+
+  for (let i = 1; i < rows.length; i++) {
+    if (rows[i][idxOrderId] === orderId) {
+      return {
+        nama: rows[i][idxNama],
+        kebutuhan: rows[i][idxKebutuhan],
+        deadline: rows[i][idxDeadline],
+        orderId: rows[i][idxOrderId]
+      };
+    }
+  }
   return null;
 }
 
