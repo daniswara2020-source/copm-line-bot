@@ -79,9 +79,10 @@ async function getLatestOrder() {
 
   const sheets = google.sheets({ version: "v4", auth });
   const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: SPREADSHEET_ID,
-    range: SHEET_NAME
-  });
+  spreadsheetId: SPREADSHEET_ID,
+  range: SHEET_RANGE
+});
+
 
   const rows = res.data.values;
   if (!rows || rows.length < 2) return null;
