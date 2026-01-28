@@ -11,7 +11,7 @@ const LINE_CONFIG = {
 };
 
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
-const SHEET_NAME = "'Form_Responses 1'";
+const SHEET_RANGE = "Form_Responses 1!A:Z";
 const KEYWORD = "ORDER";
 
 /* ========= LINE ========= */
