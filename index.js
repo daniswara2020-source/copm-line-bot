@@ -54,7 +54,7 @@ Terima kasih sudah memesan COPM BDMP Kabinet Vidyadharma
 
 Berikut adalah detail pesanan anda
 
-Pesanan  : ${order.kebutuhan}
+Pesanan : ${order.kebutuhan}
 Deadline : ${order.deadline}
 ORDER ID : ${order.orderId}
 _______________
