@@ -4,31 +4,35 @@ const { google } = require("googleapis");
 
 const app = express();
 
-/* ========= CONFIG ========= */
+/* ===================== CONFIG ===================== */
 const LINE_CONFIG = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.LINE_CHANNEL_SECRET
 };
 
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
-const SHEET_RANGE = "Form_Responses 1!A:Z";
+
+// ⚠️ SESUAI TAB SHEET DI SCREENSHOT
+const SHEET_RANGE = "'Form Responses 1'!A1:Z1000";
+
 const KEYWORD = "ORDER";
 
-/* ========= LINE ========= */
+/* ===================== LINE CLIENT ===================== */
 const client = new line.Client(LINE_CONFIG);
 
-/* ========= MIDDLEWARE ========= */
+/* ===================== WEBHOOK ===================== */
 app.post(
   "/webhook",
   line.middleware(LINE_CONFIG),
   async (req, res) => {
     try {
       const event = req.body.events?.[0];
-      if (!event || event.type !== "message") {
+      if (!event || event.type !== "message" || event.message.type !== "text") {
         return res.sendStatus(200);
       }
 
       const text = event.message.text.trim().toUpperCase();
+
       if (text !== KEYWORD) {
         await client.replyMessage(event.replyToken, {
           type: "text",
@@ -62,15 +66,15 @@ Instagram : @assaipb`;
         text: message
       });
 
-      res.sendStatus(200);
+      return res.sendStatus(200);
     } catch (err) {
-      console.error(err);
-      res.sendStatus(200);
+      console.error("WEBHOOK ERROR:", err);
+      return res.sendStatus(200);
     }
   }
 );
 
-/* ========= GOOGLE SHEETS ========= */
+/* ===================== GOOGLE SHEETS ===================== */
 async function getLatestOrder() {
   const auth = new google.auth.GoogleAuth({
     credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
@@ -78,37 +82,43 @@ async function getLatestOrder() {
   });
 
   const sheets = google.sheets({ version: "v4", auth });
-  const res = await sheets.spreadsheets.values.get({
-  spreadsheetId: SPREADSHEET_ID,
-  range: SHEET_RANGE
-});
 
+  const response = await sheets.spreadsheets.values.get({
+    spreadsheetId: SPREADSHEET_ID,
+    range: SHEET_RANGE
+  });
 
-  const rows = res.data.values;
+  const rows = response.data.values;
   if (!rows || rows.length < 2) return null;
 
   const headers = rows[0];
+
   const idxNama = headers.indexOf("Nama");
-  const idxOrder = headers.indexOf("ORDER ID");
   const idxKebutuhan = headers.indexOf("Kebutuhan desain (PPT, Poster, Infografis, dll)");
   const idxDeadline = headers.indexOf("Deadline yang diajukan");
+  const idxOrderId = headers.indexOf("ORDER ID");
 
+  // Ambil baris terakhir yang ada ORDER ID
   for (let i = rows.length - 1; i > 0; i--) {
-    if (rows[i][idxOrder]) {
+    if (rows[i][idxOrderId]) {
       return {
         nama: rows[i][idxNama],
-        orderId: rows[i][idxOrder],
         kebutuhan: rows[i][idxKebutuhan],
-        deadline: rows[i][idxDeadline]
+        deadline: rows[i][idxDeadline],
+        orderId: rows[i][idxOrderId]
       };
     }
   }
+
   return null;
 }
 
-/* ========= START SERVER ========= */
-app.get("/", (req, res) => res.send("OK"));
+/* ===================== HEALTH CHECK ===================== */
+app.get("/", (req, res) => {
+  res.send("OK");
+});
 
+/* ===================== START SERVER ===================== */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Server running on port", PORT);
