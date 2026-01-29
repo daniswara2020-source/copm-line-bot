@@ -156,7 +156,7 @@ async function getOrdersByDepartment(dept) {
   return (
 `Daftar Order Departemen ${dept}:\n\n` +
 list.join("\n") +
-`\n\nKetik !<ORDER ID> (contoh: !${dept}1) untuk melihat detail.`
+`\n\nKetik !<ORDER ID> (contoh: !${dept}280101) untuk melihat detail.`
   );
 }
 
