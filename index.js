@@ -165,12 +165,12 @@ function formatDetail(order) {
   return (
 `Detail Pesanan
 
-Nama           : ${order.nama}
+Nama : ${order.nama}
 Departemen : ${order.departemen}
-Pesanan       : ${order.kebutuhan}
-Deadline       : ${order.deadline}
-Order ID        : ${order.orderId}
-Status           : ${order.status}
+Pesanan : ${order.kebutuhan}
+Deadline : ${order.deadline}
+Order ID : ${order.orderId}
+Status : ${order.status}
 
 _______________
 Actuarial Science Student Association
