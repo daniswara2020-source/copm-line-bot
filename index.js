@@ -211,7 +211,7 @@ Instagram : @assaipb`
 /* ===== HELP MESSAGE ===== */
 function getHelpMessage() {
   return (
-`Daftar Command COPM BDMP
+`Daftar Perintah COPM
 
 !help
 → Menampilkan daftar perintah
@@ -219,17 +219,17 @@ function getHelpMessage() {
 !order
 → Menampilkan pesanan terakhir Anda
 
-!order <DEPARTEMEN>
+!order (DEPARTEMEN)
 Contoh: !order BDMP
 → Menampilkan semua pesanan departemen
 
-!<ORDER ID>
+!(ORDER ID)
 Contoh: !BDMP1
 → Menampilkan detail pesanan dan status
 
 Catatan:
 • Gunakan akun LINE yang sama dengan ID LINE di form
-• Status pesanan diperbarui oleh admin`
+• Status pesanan akan diperbarui oleh admin`
   );
 }
 
