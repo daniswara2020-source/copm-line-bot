@@ -35,8 +35,6 @@ app.post(
       }
 
       const text = event.message.text.trim().toUpperCase();
-      const userLineId = event.source.userId;
-
       let message = null;
 
       /* ========= !HELP ========= */
@@ -44,10 +42,9 @@ app.post(
         message = getHelpMessage();
       }
 
-      /* ========= !ORDER ========= */
+      /* ========= !ORDER (tanpa departemen) ========= */
       else if (text === CMD_ORDER) {
-        const order = await getLatestOrderByLineId(userLineId);
-        if (order) message = formatDetail(order);
+        message = "Gunakan format:\n!order <DEPARTEMEN>\nContoh: !order BDMP";
       }
 
       /* ========= !ORDER BDMP ========= */
@@ -105,35 +102,6 @@ async function getSheetRows() {
   return res.data.values || [];
 }
 
-/* ===== ORDER TERAKHIR MILIK USER ===== */
-async function getLatestOrderByLineId(lineId) {
-  const rows = await getSheetRows();
-  if (rows.length < 2) return null;
-
-  const h = rows[0];
-  const idxLine = h.indexOf("ID Line");
-  const idxNama = h.indexOf("Nama");
-  const idxDept = h.indexOf("Departemen");
-  const idxKebutuhan = h.indexOf("Kebutuhan desain (PPT, Poster, Infografis, dll)");
-  const idxDeadline = h.indexOf("Deadline yang diajukan");
-  const idxOrderId = h.indexOf("ORDER ID");
-  const idxStatus = h.indexOf("Status");
-
-  for (let i = rows.length - 1; i > 0; i--) {
-    if (rows[i][idxLine] === lineId) {
-      return {
-        nama: rows[i][idxNama],
-        departemen: rows[i][idxDept],
-        kebutuhan: rows[i][idxKebutuhan],
-        deadline: rows[i][idxDeadline],
-        orderId: rows[i][idxOrderId],
-        status: rows[i][idxStatus] || "Waiting"
-      };
-    }
-  }
-  return null;
-}
-
 /* ===== DETAIL BY ORDER ID ===== */
 async function getOrderById(orderId) {
   const rows = await getSheetRows();
@@ -171,12 +139,15 @@ async function getOrdersByDepartment(dept) {
   const idxDept = h.indexOf("Departemen");
   const idxOrderId = h.indexOf("ORDER ID");
   const idxDeadline = h.indexOf("Deadline yang diajukan");
+  const idxKebutuhan = h.indexOf("Kebutuhan desain (PPT, Poster, Infografis, dll)");
 
   const list = [];
 
   for (let i = 1; i < rows.length; i++) {
     if (rows[i][idxDept]?.toUpperCase() === dept && rows[i][idxOrderId]) {
-      list.push(`${rows[i][idxOrderId]} — ${rows[i][idxDeadline]}`);
+      list.push(
+        `${rows[i][idxOrderId]} - ${rows[i][idxKebutuhan]} | ${rows[i][idxDeadline]}`
+      );
     }
   }
 
@@ -216,20 +187,17 @@ function getHelpMessage() {
 !help
 → Menampilkan daftar perintah
 
-!order
-→ Menampilkan pesanan terakhir Anda
-
-!order (DEPARTEMEN)
+!order <DEPARTEMEN>
 Contoh: !order BDMP
 → Menampilkan semua pesanan departemen
 
-!(ORDER ID)
+!<ORDER ID>
 Contoh: !BDMP1
 → Menampilkan detail pesanan dan status
 
 Catatan:
-• Gunakan akun LINE yang sama dengan ID LINE di form
-• Status pesanan akan diperbarui oleh admin`
+• Semua perintah diawali tanda !
+• Status pesanan diperbarui oleh admin`
   );
 }
 
