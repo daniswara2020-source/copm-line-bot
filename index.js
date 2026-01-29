@@ -17,7 +17,7 @@ const SHEET_RANGE = "'Form Responses 1'!A1:Z1000";
 const CMD_HELP = "!HELP";
 const CMD_ORDER = "!ORDER";
 
-const ORDER_ID_REGEX = /^![A-Z]+[0-9]+$/;        // !BDMP1
+const ORDER_ID_REGEX = /^![A-Z]+[0-9]+$/;        // !BDMP280101
 const ORDER_DEPT_REGEX = /^!ORDER\s+[A-Z]+$/;   // !ORDER BDMP
 
 /* ===================== LINE CLIENT ===================== */
@@ -53,7 +53,7 @@ app.post(
         message = await getOrdersByDepartment(dept);
       }
 
-      /* ========= !BDMP1 ========= */
+      /* ========= !BDMP280101 ========= */
       else if (ORDER_ID_REGEX.test(text)) {
         const orderId = text.substring(1); // buang !
         const order = await getOrderById(orderId);
