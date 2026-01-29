@@ -192,7 +192,7 @@ Contoh: !order BDMP
 → Menampilkan semua pesanan departemen
 
 !<ORDER ID>
-Contoh: !BDMP1
+Contoh: !BDMP280101
 → Menampilkan detail pesanan dan status
 
 Catatan:
